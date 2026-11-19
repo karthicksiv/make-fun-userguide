@@ -205,6 +205,10 @@ node cli/makefun.mjs check --kit . --repo ../my-entry --transcripts transcripts.
 - **`check` is free and a submit is not.** It runs the site's own pre-submit checks on your machine and
   prints a fix beside every failure.
 
+What that looked like for this guide, built with Claude Code: the dry run showed the system prompt as
+`in-session`, so no file was needed for it, and it collected 15 instruction files without being asked. I
+passed `--effort` because the rules require it. The one part it still listed as missing was an MCP server.
+
 **You know it worked when** `check` finishes with no failed line.
 
 ## Step 6: Submit and read the verdict
@@ -234,6 +238,10 @@ entry stands, but fix it all the same, because advice can turn into a refusal la
 
 Your newest entry is the one that counts. If an older one was better, choose it again before entries
 close with `node cli/makefun.mjs final <bounty-slug> <submission-id>`.
+
+For scale: the first entry of this guide was received at 06:30:06 UTC on 19 November 2026 and read `scored`
+less than a minute later, with 26 checks passed and none failed. A bounty that has to run your code can
+take longer.
 
 **You know it worked when** `status` shows the entry as `scored`.
 
@@ -272,6 +280,15 @@ I have not reached this step myself, so it comes from the kit's rules and not fr
 The lesson: since 18 November 2026 an entry is rejected when its run record says the system prompt or the
 instruction files are withheld. If something in them is private, redact that one detail and upload the
 rest. A rejected entry still counts toward the day's limit, so each of these cost an attempt.
+
+**Three more from the session that wrote this guide.** They cost minutes and no entries, because the dry
+run and `check` caught each one before anything was sent.
+
+| What happened | Why | What fixed it |
+|---|---|---|
+| `bundle --dry-run` said no session of the repository was found | The agent had been started in a folder beside the repository, not inside it | Naming the agent's own log with `--session <file>`. Starting the agent inside the repository avoids it. |
+| The run record was missing an MCP server | The session had used a server that no MCP config file on the machine names | Declaring it with `--mcp <name>=<url>`, exactly as the dry run's message said. |
+| `check` failed its `snapshot` line with "Could not read" and a commit hash | The repository had been cloned with `--depth 1`, so its history was incomplete | Fetching the full history, then running `check` again. |
 
 **Traps the rules spell out.** Each row names the check that catches it, so you can search for it.
 
@@ -317,6 +334,21 @@ Expect company. The chess bounty alone had more than 20,000 submissions by that 
 ## Questions
 
 <details>
+<summary><strong>What do the words mean? Eight terms this guide uses</strong></summary>
+
+| Word | What it means here |
+|---|---|
+| Bounty | One contest: a task, a deadline, a scoring rule and a reward. The API calls it a competition. |
+| Kit | The download for one bounty: its rules, a starter where there is one, and the command line. |
+| Entry | One public repository at one commit, together with the transcripts of the sessions that built it. |
+| Transcripts | The session logs that your agent's program saves while it works. |
+| Run record | The part of the bundle that says how the run was set up, so a reviewer can recreate it. |
+| Escrow | The on-chain account that holds a bounty's reward until the winners claim it. |
+| USDC | A token pegged to the US dollar. Rewards are paid in it on the Solana network. |
+| Keypair | A file that acts as your wallet. It signs your entries and receives your rewards. |
+</details>
+
+<details>
 <summary><strong>Do I have to know how to code?</strong></summary>
 
 It helps you judge what the agent wrote. The agent does the typing. Your part is choosing the bounty,
@@ -343,6 +375,20 @@ Each bounty sets a daily cap and a total, and no account may send more than 20 e
 
 On most bounties, yes: the kit's `init` command starts a source bundle that needs only your keypair. A few
 bounties take a GitHub repository only, and their rules say so.
+</details>
+
+<details>
+<summary><strong>Can a team enter?</strong></summary>
+
+Yes, under one account. The rule is one account per person, and a team that wins splits the reward itself.
+</details>
+
+<details>
+<summary><strong>The kit cannot find my agent's sessions. What now?</strong></summary>
+
+Run `bundle --dry-run` right after the agent's first few steps, not at the end. If it lists no session,
+pass the log file your agent's program wrote with `--session <file>`, unchanged. Never write a session
+out from memory to fill the gap. The rules forbid it.
 </details>
 
 <details>
